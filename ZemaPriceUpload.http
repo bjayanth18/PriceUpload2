@@ -1,0 +1,6 @@
+@ZemaPriceUpload_HostAddress = http://localhost:5293
+
+POST {{ZemaPriceUpload_HostAddress}}/UploadPricesToAllegro/
+Accept: application/json
+
+###
