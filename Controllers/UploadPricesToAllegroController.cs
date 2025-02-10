@@ -28,16 +28,25 @@ namespace ZemaPriceUpload.Controllers
         [HttpPost(Name = "PostUploadPricesToAllegro")]
         public async Task<string> Post([FromBody] ZemaPrice[] prices)
         {
-            return SerializeAndPostToAllegro(prices);
+            string priceindex = string.Empty;
+            try
+            {
+                priceindex = prices[0].priceindex;
+                string filename = prices[0].priceindex + "_inputfromzema_" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                System.IO.File.WriteAllText("requestlog/" + filename + ".json", Newtonsoft.Json.JsonConvert.SerializeObject(prices));
+            }
+            catch (Exception) { }
+
+            return SerializeAndPostToAllegro(prices, priceindex);
         }
 
-        private string SerializeAndPostToAllegro(ZemaPrice[] prices)
+        private string SerializeAndPostToAllegro(ZemaPrice[] prices, string priceindex)
         {
             string resultString;
             try
             {
                 string pricesXml = SerializeToXml(prices);
-                resultString = PostToAllegro(GetSoapXml(pricesXml));
+                resultString = PostToAllegro(GetSoapXml(pricesXml), priceindex);
             }
             catch (Exception ex)
             {
@@ -70,7 +79,7 @@ namespace ZemaPriceUpload.Controllers
             return pricesXml;
         }
 
-        private string PostToAllegro(string pricesXml)
+        private string PostToAllegro(string pricesXml, string priceindex)
         {
             string url = _configuration["HorizonPriceWS"] ?? string.Empty;
             string soapAction = _configuration["HttpSoapAction"] ?? string.Empty;
@@ -99,7 +108,6 @@ namespace ZemaPriceUpload.Controllers
             //Invoke the Allegro web service
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
             {
-
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     resultString = String.Format("POST failed with HTTP {0}", response.StatusCode);
@@ -114,6 +122,13 @@ namespace ZemaPriceUpload.Controllers
                         resultString = ServiceResult;
                     }
                 }
+
+                try
+                {
+                    string filename = priceindex + "_outputfromallegro_" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
+                    System.IO.File.WriteAllText("responselog/" + filename + ".xml", resultString);
+                }
+                catch (Exception ex) { }
             }
 
             return resultString;
