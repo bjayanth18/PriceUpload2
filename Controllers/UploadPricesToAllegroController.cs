@@ -32,8 +32,10 @@ namespace ZemaPriceUpload.Controllers
             try
             {
                 priceindex = prices[0].priceindex;
-                string filename = prices[0].priceindex + "_inputfromzema_" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                System.IO.File.WriteAllText("requestlog/" + filename + ".json", Newtonsoft.Json.JsonConvert.SerializeObject(prices));
+                string filename = prices[0].priceindex + "_inputfromzema_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".json";
+                //System.IO.File.WriteAllText("requestlog/" + filename + ".json", Newtonsoft.Json.JsonConvert.SerializeObject(prices));
+                if (!String.IsNullOrEmpty(_configuration["InputFilePath"]))
+                    System.IO.File.WriteAllText(Path.Combine(_configuration["InputFilePath"], filename), Newtonsoft.Json.JsonConvert.SerializeObject(prices));
             }
             catch (Exception) { }
 
@@ -52,6 +54,14 @@ namespace ZemaPriceUpload.Controllers
             {
                 resultString = "Exception occured while uploading prices to Allegro. " + Environment.NewLine + "Message:" + ex.Message;
             }
+
+            try
+            {
+                string filename = priceindex + "_outputfromallegro_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".xml";
+                if (!String.IsNullOrEmpty(_configuration["OutputFilePath"]))
+                    System.IO.File.WriteAllText(Path.Combine(_configuration["OutputFilePath"], filename), resultString);
+            }
+            catch (Exception ex) { }
 
             return resultString;
         }
@@ -122,13 +132,6 @@ namespace ZemaPriceUpload.Controllers
                         resultString = ServiceResult;
                     }
                 }
-
-                try
-                {
-                    string filename = priceindex + "_outputfromallegro_" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                    System.IO.File.WriteAllText("responselog/" + filename + ".xml", resultString);
-                }
-                catch (Exception ex) { }
             }
 
             return resultString;
