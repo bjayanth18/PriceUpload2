@@ -64,8 +64,13 @@ namespace ZemaPriceUpload.Controllers
             try
             {
                 string filename = priceindex + "_outputfromallegro_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".xml";
+                filename = Path.Combine(_configuration["OutputFilePath"] ?? string.Empty, filename);
+                if (filename.Contains("..") || filename.Contains("/") || filename.Contains("\\"))
+                {
+                    throw new InvalidDataException("Invalid filename");
+                }
                 if (!String.IsNullOrEmpty(_configuration["OutputFilePath"]))
-                    System.IO.File.WriteAllText(Path.Combine(_configuration["OutputFilePath"], filename), resultString);
+                    System.IO.File.WriteAllText(filename, resultString);
             }
             catch (Exception ex) { }
 
