@@ -34,11 +34,12 @@ namespace ZemaPriceUpload.Controllers
             {
                 priceindex = prices[0].priceindex;
                 string filename = prices[0].priceindex + "_inputfromzema_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".json";
-                filename = Path.Combine(_configuration["InputFilePath"] ?? string.Empty, filename);
                 if (filename.Contains("..") || filename.Contains("/") || filename.Contains("\\"))
                 {
                     throw new InvalidDataException("Invalid filename");
                 }
+
+                filename = Path.Combine(_configuration["InputFilePath"] ?? string.Empty, filename);
 
                 if (!String.IsNullOrEmpty(_configuration["InputFilePath"]))
                     System.IO.File.WriteAllText(filename, Newtonsoft.Json.JsonConvert.SerializeObject(prices));
@@ -64,11 +65,13 @@ namespace ZemaPriceUpload.Controllers
             try
             {
                 string filename = priceindex + "_outputfromallegro_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".xml";
-                filename = Path.Combine(_configuration["OutputFilePath"] ?? string.Empty, filename);
                 if (filename.Contains("..") || filename.Contains("/") || filename.Contains("\\"))
                 {
                     throw new InvalidDataException("Invalid filename");
                 }
+
+                filename = Path.Combine(_configuration["OutputFilePath"] ?? string.Empty, filename);
+
                 if (!String.IsNullOrEmpty(_configuration["OutputFilePath"]))
                     System.IO.File.WriteAllText(filename, resultString);
             }
