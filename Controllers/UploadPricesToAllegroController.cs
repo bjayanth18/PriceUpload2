@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Xml;
@@ -33,9 +34,14 @@ namespace ZemaPriceUpload.Controllers
             {
                 priceindex = prices[0].priceindex;
                 string filename = prices[0].priceindex + "_inputfromzema_" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".json";
-                //System.IO.File.WriteAllText("requestlog/" + filename + ".json", Newtonsoft.Json.JsonConvert.SerializeObject(prices));
+                filename = Path.Combine(_configuration["InputFilePath"] ?? string.Empty, filename);
+                if (filename.Contains("..") || filename.Contains("/") || filename.Contains("\\"))
+                {
+                    throw new InvalidDataException("Invalid filename");
+                }
+
                 if (!String.IsNullOrEmpty(_configuration["InputFilePath"]))
-                    System.IO.File.WriteAllText(Path.Combine(_configuration["InputFilePath"], filename), Newtonsoft.Json.JsonConvert.SerializeObject(prices));
+                    System.IO.File.WriteAllText(filename, Newtonsoft.Json.JsonConvert.SerializeObject(prices));
             }
             catch (Exception) { }
 
